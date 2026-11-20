@@ -2,123 +2,92 @@
 
 Personal, portable terminal dotfiles for Linux, Ubuntu on WSL, and Windows Terminal.
 
-The repository keeps shell configuration separate from terminal-emulator settings:
-- `zsh/` contains the prompt, filename colors, aliases, and optional plugin loading.
-- `windows-terminal/` contains a reusable Catppuccin Mocha color-scheme object.
-- `install.sh` backs up the existing `.zshrc`, installs the configuration, and adds one source line.
-- `uninstall.sh` removes the integration without replacing the rest of your `.zshrc`.
+## Features
 
-## What it provides
-
-- Prompt with username, current directory, Git branch, and failed-command indicator.
-- Colored `ls`, `ll`, and `la` output with directories grouped first.
-- Distinct colors for common source, config, documentation, archive, and image extensions.
-- Optional Zsh autosuggestions and syntax highlighting when their files are installed.
-- Works with ordinary Linux Zsh installations; Oh My Zsh is not required.
+- Zsh prompt with username, current directory, and Git branch.
+- No noisy error/success glyph in the prompt.
+- Colored file listings with GNU `ls` / `LS_COLORS`.
+- Zsh syntax highlighting for recognized commands, unknown command tokens, option-shaped tokens, quoting, redirections, and shell syntax.
+- Command-history autosuggestions when the optional package is installed.
+- Zsh completion system, with additional command definitions when `zsh-completions` is installed.
+- Reusable Catppuccin Mocha Windows Terminal color scheme.
 
 ## Requirements
 
-- Linux or WSL distribution
-- `zsh`
-- GNU `ls` and `dircolors` (usually supplied by `coreutils`)
-- Git (for Git branch information)
+Install Zsh, Git, and GNU coreutils. Optional packages add richer interactive features.
 
-Optional:
-- `zsh-autosuggestions`
-- `zsh-syntax-highlighting`
-
-### Ubuntu / Debian
+### Ubuntu / Debian / WSL
 
 ```bash
 sudo apt update
-sudo apt install zsh git coreutils zsh-autosuggestions zsh-syntax-highlighting
+sudo apt install zsh git coreutils zsh-autosuggestions zsh-syntax-highlighting zsh-completions
 ```
 
 ### Fedora
 
 ```bash
-sudo dnf install zsh git coreutils zsh-autosuggestions zsh-syntax-highlighting
+sudo dnf install zsh git coreutils zsh-autosuggestions zsh-syntax-highlighting zsh-completions
 ```
 
 ### Arch Linux
 
 ```bash
-sudo pacman -S zsh git coreutils zsh-autosuggestions zsh-syntax-highlighting
+sudo pacman -S zsh git coreutils zsh-autosuggestions zsh-syntax-highlighting zsh-completions
 ```
 
-Package names and plugin file locations can vary by distribution. The plugin loader checks common locations and simply skips plugins it cannot find.
+Package names and plugin paths can vary across distributions. The plugin loader checks common paths; the base prompt and aliases still work if optional packages are absent.
 
 ## Install
-
-Clone the repository, then run:
 
 ```bash
 git clone https://github.com/YOUR_GITHUB_USERNAME/maro-terminal.git
 cd maro-terminal
 chmod +x install.sh uninstall.sh
 ./install.sh
-```
-
-Restart Zsh or run:
-
-```bash
 exec zsh
 ```
 
-The installer:
-1. Backs up your current `~/.zshrc` to a timestamped file.
-2. Copies this repository's `zsh/` configuration to `~/.config/maro-terminal/`.
-3. Adds a clearly marked source block to `~/.zshrc`, only if it is not already present.
+The installer backs up an existing `~/.zshrc`, copies the repository configuration to `~/.config/maro-terminal/`, and appends one marked source line. It does not replace the rest of your `.zshrc`.
 
-It does not replace your `.zshrc` or remove your Oh My Zsh configuration.
+## What highlighting can and cannot do
+
+`zsh-syntax-highlighting` colors shell syntax as you type. It can identify command names, unknown command tokens, common option-shaped tokens, quoting, redirections, and other syntax. It does **not** reliably validate every option against every command's actual option parser. For example, whether `git --made-up-option` is a valid Git option is best checked by Git itself.
+
+Command-specific completions provide the next layer: press `TAB` after a command or option to see available completions. `zsh-completions` adds definitions for many commands, but coverage depends on installed completion definitions and the command.
+
+URLs typed at the prompt are not automatically made into clickable terminal hyperlinks by a color theme. Clickable links in terminal output require the program producing the output and the terminal emulator to support OSC 8 hyperlinks. This repository does not claim to enable clickable links globally.
+
+`LS_COLORS` controls filename colors in `ls`; it does not control syntax highlighting while typing commands.
 
 ## Windows Terminal
 
-Windows Terminal controls the terminal window's colors and font. Zsh controls the prompt and filename colors. They are separate layers.
+Windows Terminal controls the window's palette, font, tabs, and background. Zsh controls the prompt and command-line highlighting inside WSL.
 
-1. Open Windows Terminal settings with `Ctrl+,`.
-2. Open the JSON settings file.
-3. Copy the object in `windows-terminal/catppuccin-mocha.json` into the top-level `schemes` array.
-4. In the Ubuntu profile, set:
+Add the object in `windows-terminal/catppuccin-mocha.json` to the top-level `schemes` array in your Windows Terminal `settings.json`, then set `"colorScheme": "Catppuccin Mocha"` on the Ubuntu profile. Keep machine-specific profile GUIDs and keybindings in each machine's own settings file.
 
-```json
-"colorScheme": "Catppuccin Mocha"
+## Update on an installed machine
+
+```bash
+cd ~/maro-terminal
+git pull
+cp -R zsh/. ~/.config/maro-terminal/
+exec zsh
 ```
 
-5. Save and open a new Ubuntu tab.
-
-Do not replace your entire Windows Terminal `settings.json` with this repository's scheme object. Keep your own profile GUIDs, keybindings, and other machine-specific settings.
-
-For a consistent font, install Cascadia Code or a Nerd Font on Windows, then set the Ubuntu profile's font face in Windows Terminal settings.
-
 ## Uninstall
-
-From the cloned repository:
 
 ```bash
 ./uninstall.sh
 ```
 
-This removes the marked source block from `~/.zshrc` and removes `~/.config/maro-terminal/`. It does not delete your timestamped `.zshrc` backups or change your Windows Terminal settings.
+This removes the marked integration and installed configuration. It preserves timestamped `.zshrc` backups and does not alter Windows Terminal settings.
 
 ## Customize
 
-Edit the files under `zsh/`:
-- `prompt.zsh`: prompt layout and Git branch display.
-- `colors.zsh`: filename color rules.
-- `aliases.zsh`: `ls`, `ll`, and `la`.
-- `plugins.zsh`: optional plugin loading.
-
-After editing, run:
-
-```bash
-cp -r zsh/. ~/.config/maro-terminal/
-exec zsh
-```
-
-## Portability notes
-
-The Zsh configuration is intended for Linux distributions and WSL. Windows Terminal is a Windows terminal emulator and can host WSL, PowerShell, and Command Prompt, but it does not make Zsh configuration apply to PowerShell or CMD. Native PowerShell needs its own profile configuration.
+- `zsh/prompt.zsh`: prompt layout.
+- `zsh/colors.zsh`: filename colors.
+- `zsh/aliases.zsh`: listing aliases.
+- `zsh/plugins.zsh`: completion, autosuggestions, and syntax-highlighting styles.
 
 ## License
 

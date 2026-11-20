@@ -1,4 +1,4 @@
-# GNU ls aliases: colorize output and put directories first.
+# GNU ls aliases: colorize output and group directories first.
 if ls --version >/dev/null 2>&1; then
     alias ls='ls --color=auto --group-directories-first'
     alias ll='ls -lah --color=auto --group-directories-first'

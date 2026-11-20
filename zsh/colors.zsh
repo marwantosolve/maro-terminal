@@ -1,4 +1,4 @@
-# GNU ls filename colors. Keep dircolors defaults, then override selected types.
+# GNU ls filename colors.
 if command -v dircolors >/dev/null 2>&1; then
     eval "$(dircolors -b)"
 fi
